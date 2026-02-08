@@ -29,117 +29,228 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS personalizado
+# CSS personalizado mejorado
 st.markdown("""
 <style>
+    /* Títulos principales */
     .main-header {
-        font-size: 3rem;
-        font-weight: bold;
+        font-size: 2.5rem;
+        font-weight: 800;
         text-align: center;
-        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem 0;
     }
+    
+    /* Cards mejoradas */
     .metric-card {
-        background: #f0f2f6;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        border-left: 4px solid #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        color: white;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+    
+    /* Success box */
     .success-box {
-        padding: 1rem;
-        border-radius: 0.5rem;
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
+        padding: 1.5rem;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        color: white;
+        margin: 1rem 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
+    
+    /* Warning box */
     .warning-box {
+        padding: 1.5rem;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        margin: 1rem 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Info box */
+    .info-box {
+        padding: 1.5rem;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        margin: 1rem 0;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Alert card */
+    .alert-card {
         padding: 1rem;
-        border-radius: 0.5rem;
-        background-color: #fff3cd;
-        border: 1px solid #ffeaa7;
-        color: #856404;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border-left: 5px solid;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .alert-critico { border-left-color: #dc3545; }
+    .alert-warning { border-left-color: #ffc107; }
+    .alert-info { border-left-color: #17a2b8; }
+    
+    /* Sidebar styling */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    [data-testid="stSidebar"] * {
+        color: white !important;
+    }
+    
+    /* Botones mejorados */
+    .stButton>button {
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Ocultar índices de dataframes */
+    .dataframe {
+        font-size: 0.9rem;
+    }
+    
+    /* Mejorar tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 10px 10px 0 0;
+        padding: 10px 20px;
+        font-weight: 600;
     }
 </style>
 """, unsafe_allow_html=True)
 
+# Estado de sesión para navegación
+if 'pagina_actual' not in st.session_state:
+    st.session_state.pagina_actual = "🏠 Dashboard"
+
 def cargar_datos():
     """Carga y prepara los datos"""
     analisis.cargar_datos()
+    
+    # Si no hay datos, generar automáticamente
+    if analisis.transacciones_df.empty:
+        st.info("🔄 Generando datos de prueba automáticamente...")
+        try:
+            from src.data_processing.data_generator import data_generator
+            data_generator.generar_datos_prueba(dias=90)
+            analisis.cargar_datos()
+            st.success("✅ Datos de prueba generados")
+        except Exception as e:
+            st.warning(f"No se pudieron generar datos automáticamente: {e}")
+    
     return analisis.transacciones_df
 
 def pagina_dashboard():
-    """Página principal del dashboard"""
-    st.markdown('<h1 class="main-header">💰 Gestor Financiero Inteligente</h1>', unsafe_allow_html=True)
+    """Página principal del dashboard con diseño mejorado"""
+    st.markdown('<h1 class="main-header">💰 Dashboard Financiero Inteligente</h1>', unsafe_allow_html=True)
     
     # Recargar datos
     df = cargar_datos()
     
     if df.empty:
-        st.warning("⚠️ No hay datos disponibles. Genera datos de prueba o agrega transacciones manualmente.")
+        st.markdown("""
+        <div class="info-box">
+            <h3>👋 ¡Bienvenido!</h3>
+            <p>No hay datos disponibles. Genera datos de prueba o agrega transacciones manualmente.</p>
+        </div>
+        """, unsafe_allow_html=True)
         return
     
     # Resumen general
     resumen = analisis.resumen_general()
     
-    # Métricas principales
+    # Métricas principales con diseño mejorado
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric(
-            "💵 Total Ingresos",
-            f"${resumen['total_ingresos']:,.2f}",
-            delta=f"{resumen['num_transacciones']} trans."
-        )
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                    padding: 1.5rem; border-radius: 15px; color: white; text-align: center;">
+            <h4 style="margin: 0; opacity: 0.9;">💵 Ingresos</h4>
+            <h2 style="margin: 0.5rem 0;">${:,.0f}</h2>
+            <p style="margin: 0; opacity: 0.8; font-size: 0.9rem;">{} transacciones</p>
+        </div>
+        """.format(resumen['total_ingresos'], resumen['num_transacciones']), unsafe_allow_html=True)
     
     with col2:
-        st.metric(
-            "💸 Total Gastos",
-            f"${resumen['total_gastos']:,.2f}",
-            delta=f"-{resumen['promedio_gasto']:.0f} promedio"
-        )
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+                    padding: 1.5rem; border-radius: 15px; color: white; text-align: center;">
+            <h4 style="margin: 0; opacity: 0.9;">💸 Gastos</h4>
+            <h2 style="margin: 0.5rem 0;">${:,.0f}</h2>
+            <p style="margin: 0; opacity: 0.8; font-size: 0.9rem;">Promedio: ${:,.0f}</p>
+        </div>
+        """.format(resumen['total_gastos'], resumen['promedio_gasto']), unsafe_allow_html=True)
     
     with col3:
-        balance_color = "normal" if resumen['balance'] >= 0 else "inverse"
-        st.metric(
-            "💰 Balance",
-            f"${resumen['balance']:,.2f}",
-            delta=f"{resumen['tasa_ahorro']:.1f}% ahorro",
-            delta_color=balance_color
-        )
+        balance_gradient = "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)" if resumen['balance'] >= 0 else "linear-gradient(135deg, #ee0979 0%, #ff6a00 100%)"
+        st.markdown("""
+        <div style="background: {}; 
+                    padding: 1.5rem; border-radius: 15px; color: white; text-align: center;">
+            <h4 style="margin: 0; opacity: 0.9;">💰 Balance</h4>
+            <h2 style="margin: 0.5rem 0;">${:,.0f}</h2>
+            <p style="margin: 0; opacity: 0.8; font-size: 0.9rem;">Ahorro: {:.1f}%</p>
+        </div>
+        """.format(balance_gradient, resumen['balance'], resumen['tasa_ahorro']), unsafe_allow_html=True)
     
     with col4:
-        st.metric(
-            "📊 Transacciones",
-            resumen['num_transacciones'],
-            delta="Total registradas"
-        )
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); 
+                    padding: 1.5rem; border-radius: 15px; color: white; text-align: center;">
+            <h4 style="margin: 0; opacity: 0.9;">📊 Total</h4>
+            <h2 style="margin: 0.5rem 0;">{}</h2>
+            <p style="margin: 0; opacity: 0.8; font-size: 0.9rem;">Transacciones</p>
+        </div>
+        """.format(resumen['num_transacciones']), unsafe_allow_html=True)
     
-    st.markdown("---")
+    st.markdown("<br>", unsafe_allow_html=True)
     
     # Gráficos principales
     col1, col2 = st.columns(2)
     
     with col1:
-        # Gráfico de gastos por categoría
-        st.subheader("📊 Gastos por Categoría")
+        st.markdown("### 📊 Distribución de Gastos")
         gastos_cat = analisis.gastos_por_categoria()
         
         if not gastos_cat.empty:
             fig = px.pie(
                 values=gastos_cat['Total'],
                 names=gastos_cat.index,
-                title="Distribución de Gastos",
-                hole=0.4,
-                color_discrete_sequence=px.colors.qualitative.Set3
+                hole=0.5,
+                color_discrete_sequence=px.colors.qualitative.Vivid
             )
-            fig.update_traces(textposition='inside', textinfo='percent+label')
+            fig.update_traces(
+                textposition='inside',
+                textinfo='percent+label',
+                textfont_size=12,
+                marker=dict(line=dict(color='white', width=2))
+            )
+            fig.update_layout(
+                showlegend=False,
+                height=400,
+                margin=dict(t=30, b=30, l=30, r=30)
+            )
             st.plotly_chart(fig, use_container_width=True)
     
     with col2:
-        # Tendencia mensual
-        st.subheader("📈 Tendencia Mensual")
+        st.markdown("### 📈 Tendencia Mensual")
         tendencia = analisis.tendencia_mensual()
         
         if not tendencia.empty:
@@ -151,7 +262,9 @@ def pagina_dashboard():
                     y=tendencia['ingreso'],
                     name='Ingresos',
                     mode='lines+markers',
-                    line=dict(color='#2ecc71', width=3)
+                    line=dict(color='#2ecc71', width=3),
+                    fill='tozeroy',
+                    fillcolor='rgba(46, 204, 113, 0.1)'
                 ))
             
             if 'gasto' in tendencia.columns:
@@ -160,29 +273,60 @@ def pagina_dashboard():
                     y=tendencia['gasto'],
                     name='Gastos',
                     mode='lines+markers',
-                    line=dict(color='#e74c3c', width=3)
+                    line=dict(color='#e74c3c', width=3),
+                    fill='tozeroy',
+                    fillcolor='rgba(231, 76, 60, 0.1)'
                 ))
             
             fig.update_layout(
-                title="Ingresos vs Gastos",
                 xaxis_title="Mes",
                 yaxis_title="Monto ($)",
-                hovermode='x unified'
+                hovermode='x unified',
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=1.02,
+                    xanchor="right",
+                    x=1
+                ),
+                height=400,
+                margin=dict(t=50, b=30, l=30, r=30)
             )
             st.plotly_chart(fig, use_container_width=True)
     
     # Tabla de gastos por categoría
     st.markdown("---")
-    st.subheader("📋 Detalle por Categoría")
+    st.markdown("### 📋 Detalle por Categoría")
     
     if not gastos_cat.empty:
-        # Formatear para mostrar
-        gastos_display = gastos_cat.copy()
-        gastos_display['Total'] = gastos_display['Total'].apply(lambda x: f"${x:,.2f}")
-        gastos_display['Promedio'] = gastos_display['Promedio'].apply(lambda x: f"${x:,.2f}")
-        gastos_display['Porcentaje'] = gastos_display['Porcentaje'].apply(lambda x: f"{x:.1f}%")
+        # Crear gráfico de barras horizontal
+        fig = px.bar(
+            gastos_cat.reset_index(),
+            y='categoria',
+            x='Total',
+            orientation='h',
+            text='Porcentaje',
+            color='Total',
+            color_continuous_scale='Reds'
+        )
         
-        st.dataframe(gastos_display, use_container_width=True)
+        fig.update_traces(texttemplate='%{text}', textposition='outside')
+        fig.update_layout(
+            xaxis_title="Monto Total ($)",
+            yaxis_title="",
+            showlegend=False,
+            height=400
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Tabla resumen
+        with st.expander("📊 Ver tabla detallada"):
+            gastos_display = gastos_cat.copy()
+            gastos_display['Total'] = gastos_display['Total'].apply(lambda x: f"${x:,.2f}")
+            gastos_display['Promedio'] = gastos_display['Promedio'].apply(lambda x: f"${x:,.2f}")
+            gastos_display['Porcentaje'] = gastos_display['Porcentaje'].apply(lambda x: f"{x:.1f}%")
+            st.dataframe(gastos_display, use_container_width=True, height=400)
 
 def pagina_predicciones():
     """Página de predicciones"""
@@ -281,81 +425,276 @@ def pagina_predicciones():
             st.plotly_chart(fig, use_container_width=True)
 
 def pagina_anomalias():
-    """Página de detección de anomalías"""
-    st.markdown('<h1 class="main-header">🔍 Detección de Anomalías</h1>', unsafe_allow_html=True)
+    """Página de detección de anomalías con diseño mejorado"""
+    st.markdown('<h1 class="main-header">🔍 Detector de Anomalías Inteligente</h1>', unsafe_allow_html=True)
     
+    # Verificar entrenamiento
     if not detector.is_trained and not detector.cargar_modelo():
-        st.warning("⚠️ El detector no está entrenado.")
+        st.markdown("""
+        <div class="warning-box">
+            <h3>⚠️ Modelo No Entrenado</h3>
+            <p>El detector de anomalías necesita ser entrenado primero para funcionar correctamente.</p>
+        </div>
+        """, unsafe_allow_html=True)
         
-        if st.button("🧠 Entrenar Detector"):
-            with st.spinner("Entrenando detector..."):
-                resultado = detector.entrenar()
-                if resultado:
-                    st.success(f"✅ Detector entrenado - {resultado['anomalias_detectadas']} anomalías detectadas")
-                    st.experimental_rerun()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("🧠 Entrenar Detector Ahora", type="primary", use_container_width=True):
+                with st.spinner("🔄 Entrenando detector de anomalías..."):
+                    resultado = detector.entrenar()
+                    if resultado:
+                        st.success(f"✅ Detector entrenado exitosamente!")
+                        st.info(f"📊 {resultado['anomalias_detectadas']} anomalías detectadas en datos históricos")
+                        st.rerun()
         return
     
-    tab1, tab2 = st.tabs(["🔍 Analizar Gasto", "📋 Historial de Anomalías"])
+    # Tabs mejoradas
+    tab1, tab2 = st.tabs(["🔍 Analizar Nuevo Gasto", "📊 Historial de Anomalías"])
     
     with tab1:
-        st.subheader("Analizar Nuevo Gasto")
+        st.markdown("### Verificar si un gasto es inusual")
+        st.write("Ingresa los detalles del gasto para verificar si está dentro de tus patrones normales.")
         
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            monto = st.number_input("Monto ($)", min_value=0.0, value=100.0, step=10.0)
-            categoria = st.selectbox("Categoría", CATEGORIAS_GASTOS, key="anomalia_cat")
-        
-        with col2:
-            fecha = st.date_input("Fecha", datetime.now(), key="anomalia_fecha")
-        
-        if st.button("🔍 Analizar"):
-            fecha_dt = datetime.combine(fecha, datetime.now().time())
-            resultado = detector.detectar_anomalia(monto, categoria, fecha_dt)
+        # Formulario mejorado
+        with st.form("form_anomalia", clear_on_submit=False):
+            col1, col2 = st.columns(2)
             
-            # Usamos .get() para evitar que el programa falle si falta alguna llave
-            es_anomalia = resultado.get('es_anomalia', False)
-            promedio = resultado.get('promedio_categoria', 0.0)
-            confianza = resultado.get('confianza', 0.0)
-            desviaciones = resultado.get('desviaciones_std', 0.0)
-            mensaje = resultado.get('mensaje', 'Análisis completado')
-
-            if es_anomalia:
-                st.markdown(f"""
-                <div class="warning-box">
-                    <h3>⚠️ ALERTA: GASTO INUSUAL</h3>
-                    <p><strong>Confianza:</strong> {confianza:.1f}%</p>
-                    <p><strong>Promedio categoría:</strong> ${promedio:.2f}</p>
-                    <p><strong>Desviaciones:</strong> {desviaciones:.2f}σ</p>
-                    <p><strong>Razón:</strong> {mensaje}</p>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown(f"""
-                <div class="success-box">
-                    <h3>✅ GASTO NORMAL</h3>
-                    <p><strong>Promedio categoría:</strong> ${promedio:.2f}</p>
-                    <p>{mensaje}</p>
-                </div>
-                """, unsafe_allow_html=True)
+            with col1:
+                monto = st.number_input(
+                    "💵 Monto del Gasto ($)", 
+                    min_value=0.0, 
+                    value=100.0, 
+                    step=10.0,
+                    help="Ingresa el monto que quieres analizar"
+                )
+                
+                categoria = st.selectbox(
+                    "📁 Categoría",
+                    CATEGORIAS_GASTOS,
+                    help="Selecciona la categoría del gasto"
+                )
+            
+            with col2:
+                fecha = st.date_input(
+                    "📅 Fecha del Gasto",
+                    datetime.now(),
+                    help="Fecha en que se realizó el gasto"
+                )
+                
+                st.write("")  # Espaciado
+                st.write("")
+                analizar_btn = st.form_submit_button(
+                    "🔍 Analizar Gasto",
+                    type="primary",
+                    use_container_width=True
+                )
+            
+            if analizar_btn:
+                fecha_dt = datetime.combine(fecha, datetime.now().time())
+                
+                with st.spinner("🔄 Analizando..."):
+                    try:
+                        resultado = detector.detectar_anomalia(monto, categoria, fecha_dt)
+                    except Exception as e:
+                        st.error(f"❌ Error al analizar: {e}")
+                        resultado = None
+                
+                if resultado:
+                    st.markdown("---")
+                    st.markdown("### 📊 Resultado del Análisis")
+                    
+                    # Verificar que tengamos los datos necesarios
+                    if not resultado.get('promedio_categoria') and resultado.get('mensaje'):
+                        # No hay histórico suficiente
+                        st.markdown(f"""
+                        <div class="info-box">
+                            <h3>ℹ️ Información Insuficiente</h3>
+                            <p>{resultado.get('mensaje', 'No hay suficiente histórico para esta categoría.')}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    
+                    elif resultado.get('es_anomalia'):
+                        # Alerta de anomalía
+                        st.markdown(f"""
+                        <div class="warning-box">
+                            <h2 style="margin:0;">⚠️ GASTO INUSUAL DETECTADO</h2>
+                            <p style="font-size:1.2rem; margin:0.5rem 0;">Este gasto está fuera de tus patrones normales</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Métricas en columnas
+                        col1, col2, col3 = st.columns(3)
+                        
+                        with col1:
+                            st.metric(
+                                "Confianza de Detección",
+                                f"{resultado.get('confianza', 0):.1f}%",
+                                delta="Alta" if resultado.get('confianza', 0) > 70 else "Media"
+                            )
+                        
+                        with col2:
+                            promedio = resultado.get('promedio_categoria', monto)
+                            st.metric(
+                                "Promedio Normal",
+                                f"${promedio:.2f}",
+                                delta=f"+${monto - promedio:.2f}"
+                            )
+                        
+                        with col3:
+                            desv = resultado.get('desviaciones_std', 0)
+                            st.metric(
+                                "Desviación",
+                                f"{abs(desv):.1f}σ",
+                                delta="Muy alto" if abs(desv) > 3 else "Alto"
+                            )
+                        
+                        # Explicación
+                        st.info(f"💡 **Análisis:** {resultado.get('mensaje', 'Gasto inusual detectado')}")
+                        
+                        # Gráfico comparativo
+                        if resultado.get('promedio_categoria'):
+                            fig = go.Figure()
+                            
+                            fig.add_trace(go.Bar(
+                                x=['Promedio', 'Tu Gasto'],
+                                y=[resultado['promedio_categoria'], monto],
+                                marker_color=['#2ecc71', '#e74c3c'],
+                                text=[f"${resultado['promedio_categoria']:.2f}", f"${monto:.2f}"],
+                                textposition='auto',
+                            ))
+                            
+                            fig.update_layout(
+                                title="Comparación con el Promedio",
+                                yaxis_title="Monto ($)",
+                                showlegend=False,
+                                height=300
+                            )
+                            
+                            st.plotly_chart(fig, use_container_width=True)
+                    
+                    else:
+                        # Gasto normal
+                        st.markdown(f"""
+                        <div class="success-box">
+                            <h2 style="margin:0;">✅ GASTO NORMAL</h2>
+                            <p style="font-size:1.2rem; margin:0.5rem 0;">Este gasto está dentro de tus patrones habituales</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            promedio = resultado.get('promedio_categoria', monto)
+                            st.metric(
+                                "Promedio de Categoría",
+                                f"${promedio:.2f}"
+                            )
+                        
+                        with col2:
+                            diferencia = monto - promedio
+                            st.metric(
+                                "Diferencia",
+                                f"${abs(diferencia):.2f}",
+                                delta="Por encima" if diferencia > 0 else "Por debajo"
+                            )
+                        
+                        st.success(f"💡 **Análisis:** {resultado.get('mensaje', 'Gasto dentro del rango normal')}")
     
     with tab2:
-        st.subheader("Anomalías Detectadas (Últimos 30 días)")
+        st.markdown("### Anomalías Detectadas en los Últimos 30 Días")
         
-        anomalias_df = detector.analizar_anomalias_historicas(30)
+        # Selector de días
+        col1, col2 = st.columns([1, 3])
+        with col1:
+            dias = st.selectbox("📅 Periodo", [7, 15, 30, 60, 90], index=2)
+        
+        with st.spinner("🔍 Buscando anomalías..."):
+            anomalias_df = detector.analizar_anomalias_historicas(dias)
         
         if anomalias_df.empty:
-            st.info("✅ No se detectaron anomalías en los últimos 30 días")
+            st.markdown("""
+            <div class="success-box">
+                <h3>✅ ¡Excelente!</h3>
+                <p>No se detectaron gastos inusuales en los últimos {dias} días.</p>
+            </div>
+            """.format(dias=dias), unsafe_allow_html=True)
         else:
-            st.warning(f"⚠️ {len(anomalias_df)} anomalías detectadas")
+            # Resumen
+            st.markdown(f"""
+            <div class="warning-box">
+                <h3>⚠️ {len(anomalias_df)} Anomalías Detectadas</h3>
+                <p>Se encontraron gastos fuera de tus patrones normales.</p>
+            </div>
+            """, unsafe_allow_html=True)
             
-            # Mostrar tabla
-            display_df = anomalias_df.copy()
-            display_df['fecha'] = display_df['fecha'].dt.strftime('%Y-%m-%d %H:%M')
-            display_df['monto'] = display_df['monto'].apply(lambda x: f"${x:,.2f}")
-            display_df['confianza'] = display_df['confianza'].apply(lambda x: f"{x:.1f}%")
+            # Estadísticas rápidas
+            col1, col2, col3, col4 = st.columns(4)
             
-            st.dataframe(display_df, use_container_width=True)
+            with col1:
+                st.metric("Total Anomalías", len(anomalias_df))
+            
+            with col2:
+                monto_total = anomalias_df['monto'].sum()
+                st.metric("Monto Total", f"${monto_total:,.2f}")
+            
+            with col3:
+                confianza_prom = anomalias_df['confianza'].mean()
+                st.metric("Confianza Promedio", f"{confianza_prom:.1f}%")
+            
+            with col4:
+                categorias_afectadas = anomalias_df['categoria'].nunique()
+                st.metric("Categorías Afectadas", categorias_afectadas)
+            
+            st.markdown("---")
+            
+            # Lista de anomalías con diseño mejorado
+            st.markdown("#### 📋 Detalle de Anomalías")
+            
+            for idx, row in anomalias_df.iterrows():
+                with st.expander(
+                    f"⚠️ {row['categoria']} - ${row['monto']:,.2f} ({row['fecha'].strftime('%d/%m/%Y')})",
+                    expanded=False
+                ):
+                    col1, col2 = st.columns([2, 1])
+                    
+                    with col1:
+                        st.write(f"**📅 Fecha:** {row['fecha'].strftime('%d de %B, %Y a las %H:%M')}")
+                        st.write(f"**📁 Categoría:** {row['categoria']}")
+                        st.write(f"**💰 Monto:** ${row['monto']:,.2f}")
+                        if row['motivo']:
+                            st.write(f"**📝 Motivo:** {row['motivo']}")
+                        st.info(f"💡 {row['mensaje']}")
+                    
+                    with col2:
+                        st.metric("Confianza", f"{row['confianza']:.1f}%")
+                        
+                        # Indicador visual de confianza
+                        confianza_normalizada = row['confianza'] / 100
+                        st.progress(confianza_normalizada)
+            
+            # Gráfico de anomalías por categoría
+            st.markdown("---")
+            st.markdown("#### 📊 Anomalías por Categoría")
+            
+            anomalias_por_cat = anomalias_df.groupby('categoria').agg({
+                'monto': ['count', 'sum']
+            }).reset_index()
+            anomalias_por_cat.columns = ['Categoría', 'Cantidad', 'Monto Total']
+            
+            fig = px.bar(
+                anomalias_por_cat,
+                x='Categoría',
+                y='Cantidad',
+                color='Monto Total',
+                title="Distribución de Anomalías",
+                color_continuous_scale='Reds',
+                text='Cantidad'
+            )
+            
+            fig.update_traces(textposition='outside')
+            fig.update_layout(height=400)
+            
+            st.plotly_chart(fig, use_container_width=True)
 
 def pagina_agregar_transaccion():
     """Página para agregar transacciones"""
@@ -847,60 +1186,112 @@ def pagina_analisis_avanzado():
         else:
             st.info("⚠️ No hay gastos recurrentes registrados")
 
-# Sidebar
-# --- SECCIÓN DE NAVEGACIÓN UNIFICADA (Sustituye desde el Sidebar hasta el final) ---
-
+# Sidebar con navegación mejorada
 with st.sidebar:
-    st.image("https://img.icons8.com/fluency/96/000000/money-bag.png", width=80)
-    st.title("Gestor Financiero")
-    
-    # Unificamos todas las opciones en una sola lista para evitar conflictos de estado
-    opciones = [
-        "🏠 Dashboard", 
-        "➕ Agregar Transacción",
-        "🔮 Predicciones", 
-        "🔍 Anomalías", 
-        "📊 Análisis Avanzado",
-        "📑 Reportes", 
-        "🔔 Alertas", 
-        "💰 Presupuestos"
-    ]
-    
-    pagina_seleccionada = st.radio(
-        "Seleccione una sección:",
-        opciones,
-        index=0,
-        key="navegacion_principal"
-    )
+    # Logo y título
+    st.markdown("""
+    <div style="text-align: center; padding: 1rem 0;">
+        <h1 style="color: white; font-size: 2rem; margin: 0;">💰</h1>
+        <h2 style="color: white; font-size: 1.3rem; margin: 0.5rem 0;">Gestor Financiero</h2>
+        <p style="color: rgba(255,255,255,0.8); font-size: 0.9rem;">Inteligencia Artificial</p>
+    </div>
+    """, unsafe_allow_html=True)
     
     st.markdown("---")
     
-    # Estadísticas rápidas
+    # Navegación principal
+    st.markdown("### 📍 Navegación")
+    
+    # Botones de navegación estilo vertical
+    if st.button("🏠 Dashboard Principal", use_container_width=True, 
+                 type="primary" if st.session_state.pagina_actual == "🏠 Dashboard" else "secondary"):
+        st.session_state.pagina_actual = "🏠 Dashboard"
+        st.rerun()
+    
+    if st.button("➕ Agregar Transacción", use_container_width=True,
+                 type="primary" if st.session_state.pagina_actual == "➕ Agregar Transacción" else "secondary"):
+        st.session_state.pagina_actual = "➕ Agregar Transacción"
+        st.rerun()
+    
+    st.markdown("#### 🤖 Inteligencia Artificial")
+    
+    if st.button("🔮 Predicciones IA", use_container_width=True,
+                 type="primary" if st.session_state.pagina_actual == "🔮 Predicciones" else "secondary"):
+        st.session_state.pagina_actual = "🔮 Predicciones"
+        st.rerun()
+    
+    if st.button("🔍 Detector de Anomalías", use_container_width=True,
+                 type="primary" if st.session_state.pagina_actual == "🔍 Anomalías" else "secondary"):
+        st.session_state.pagina_actual = "🔍 Anomalías"
+        st.rerun()
+    
+    if st.button("📊 Análisis Avanzado", use_container_width=True,
+                 type="primary" if st.session_state.pagina_actual == "📊 Análisis Avanzado" else "secondary"):
+        st.session_state.pagina_actual = "📊 Análisis Avanzado"
+        st.rerun()
+    
+    st.markdown("#### 📄 Reportes y Gestión")
+    
+    if st.button("📑 Generar Reportes", use_container_width=True,
+                 type="primary" if st.session_state.pagina_actual == "📑 Reportes" else "secondary"):
+        st.session_state.pagina_actual = "📑 Reportes"
+        st.rerun()
+    
+    if st.button("🔔 Ver Alertas", use_container_width=True,
+                 type="primary" if st.session_state.pagina_actual == "🔔 Alertas" else "secondary"):
+        st.session_state.pagina_actual = "🔔 Alertas"
+        st.rerun()
+    
+    if st.button("💰 Presupuestos", use_container_width=True,
+                 type="primary" if st.session_state.pagina_actual == "💰 Presupuestos" else "secondary"):
+        st.session_state.pagina_actual = "💰 Presupuestos"
+        st.rerun()
+    
+    st.markdown("---")
+    
+    # Resumen rápido
     st.markdown("### 📊 Resumen Rápido")
     df = cargar_datos()
+    
     if not df.empty:
-        st.metric("Transacciones", len(df))
-        balance = df[df['tipo']=='ingreso']['monto'].sum() - df[df['tipo']=='gasto']['monto'].sum()
-        st.metric("Balance Total", f"${balance:,.2f}")
+        col1, col2 = st.columns(2)
         
-        reporte_alertas = sistema_alertas.generar_reporte_alertas()
-        if reporte_alertas['total_alertas'] > 0:
-            st.warning(f"⚠️ {reporte_alertas['total_alertas']} alertas pendientes")
+        with col1:
+            st.metric("Transacciones", len(df), label_visibility="visible")
+        
+        with col2:
+            balance = df[df['tipo']=='ingreso']['monto'].sum() - df[df['tipo']=='gasto']['monto'].sum()
+            st.metric("Balance", f"${balance:,.0f}", label_visibility="visible")
+        
+        # Alertas pendientes
+        try:
+            reporte_alertas = sistema_alertas.generar_reporte_alertas()
+            if reporte_alertas['total_alertas'] > 0:
+                st.warning(f"⚠️ {reporte_alertas['total_alertas']} alertas")
+        except:
+            pass
+    
+    st.markdown("---")
+    st.caption("v1.0.0 - Powered by IA")
 
-# --- ENRUTAMIENTO CORREGIDO ---
-if "Dashboard" in pagina_seleccionada:
+# Enrutamiento basado en estado de sesión
+pagina = st.session_state.pagina_actual
+
+if "Dashboard" in pagina:
     pagina_dashboard()
-elif "Agregar Transacción" in pagina_seleccionada:
+elif "Agregar" in pagina:
     pagina_agregar_transaccion()
-elif "Predicciones" in pagina_seleccionada:
+elif "Predicciones" in pagina:
     pagina_predicciones()
-elif "Anomalías" in pagina_seleccionada:
+elif "Anomalías" in pagina:
     pagina_anomalias()
-elif "Análisis Avanzado" in pagina_seleccionada:
+elif "Análisis" in pagina:
     pagina_analisis_avanzado()
-elif "Reportes" in pagina_seleccionada:
+elif "Reportes" in pagina:
     pagina_reportes()
-elif "Alertas" in pagina_seleccionada:
+elif "Alertas" in pagina:
     pagina_alertas()
-elif "Presupuestos" in pagina_seleccionada:
+elif "Presupuestos" in pagina:
     pagina_presupuestos()
+else:
+    pagina_dashboard()

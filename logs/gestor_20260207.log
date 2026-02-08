@@ -1279,3 +1279,15 @@
 2026-02-07 18:28:34,612 - GestorFinanciero - INFO - 🔔 Generando reporte de alertas...
 2026-02-07 18:28:34,679 - GestorFinanciero - INFO - ✅ Reporte generado: 0 alertas
 2026-02-07 18:28:34,684 - GestorFinanciero - INFO - ✅ Datos cargados: 1 transacciones
+2026-02-07 21:47:29,714 - GestorFinanciero - INFO - ✅ Tablas creadas correctamente
+2026-02-07 21:47:29,792 - GestorFinanciero - INFO - ✅ Base de datos inicializada
+2026-02-07 21:48:09,121 - GestorFinanciero - INFO - ✅ Datos cargados: 1 transacciones
+2026-02-07 21:48:19,867 - GestorFinanciero - INFO - ✅ Tablas creadas correctamente
+2026-02-07 21:48:19,868 - GestorFinanciero - INFO - ✅ Base de datos inicializada
+2026-02-07 21:48:19,888 - GestorFinanciero - INFO - ✅ Datos cargados: 1 transacciones
+2026-02-07 21:48:49,632 - GestorFinanciero - INFO - 🚀 Iniciando Gestor Financiero Inteligente
+2026-02-07 21:48:51,516 - GestorFinanciero - INFO - ✅ Datos cargados: 1 transacciones
+2026-02-07 21:48:52,116 - GestorFinanciero - INFO - 🔔 Generando reporte de alertas...
+2026-02-07 21:48:52,214 - GestorFinanciero - INFO - ✅ Reporte generado: 0 alertas
+2026-02-07 21:48:52,219 - GestorFinanciero - INFO - ✅ Datos cargados: 1 transacciones
+2026-02-07 21:49:38,332 - GestorFinanciero - INFO - ✅ Aplicación cerrada correctamente
